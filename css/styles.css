@@ -1105,21 +1105,36 @@ body::before {
   pointer-events: none;
 }
 
-/* Country Markers */
+/* Country Markers - Clean, Non-jittery Geometry */
 .map-marker-group {
   cursor: pointer;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
 }
 
-.map-marker-group:hover {
-  transform: scale(1.18);
+.map-marker-hit {
+  cursor: pointer;
 }
 
-.map-marker-ring {
-  fill: none;
-  stroke: #FFFFFF;
-  stroke-width: 1.5;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
+.map-marker-disc {
+  transition: stroke 0.2s ease, stroke-width 0.2s ease, filter 0.2s ease;
+}
+
+.map-marker-group:hover .map-marker-disc,
+.map-marker-group.active .map-marker-disc {
+  stroke: var(--gold-light) !important;
+  stroke-width: 2.5px !important;
+  filter: drop-shadow(0 0 6px var(--gold-primary));
+}
+
+.map-marker-custodian .map-marker-disc {
+  stroke: #10B981 !important;
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.7));
+}
+
+.map-marker-custodian:hover .map-marker-disc,
+.map-marker-custodian.active .map-marker-disc {
+  stroke: #FFFFFF !important;
+  filter: drop-shadow(0 0 12px #10B981);
 }
 
 .map-marker-label {
@@ -1137,20 +1152,166 @@ body::before {
   user-select: none;
 }
 
+.map-custodian-label {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  fill: #10B981;
+  text-anchor: middle;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: #08110D;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  user-select: none;
+}
+
+/* Cartographic Country Dossier Popover (Stable, Anchored, Non-jittery) */
+.map-dossier {
+  position: absolute;
+  width: 280px;
+  background: rgba(10, 20, 15, 0.97);
+  border: 1px solid var(--gold-primary);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.15rem;
+  color: var(--text-heading);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  z-index: 60;
+  pointer-events: auto;
+  backdrop-filter: blur(8px);
+  animation: dossierFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dossierFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dossier-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.15s ease;
+}
+
+.dossier-close:hover {
+  color: var(--gold-light);
+}
+
+.dossier-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+}
+
+.dossier-flag {
+  font-size: 1.85rem;
+  line-height: 1;
+}
+
+.dossier-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--text-pure);
+  line-height: 1.2;
+}
+
+.dossier-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold-primary);
+  margin-top: 3px;
+}
+
+.dossier-badge.custodian {
+  color: #10B981;
+}
+
+.dossier-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.dossier-stat-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xs);
+  padding: 0.4rem 0.5rem;
+  text-align: center;
+}
+
+.dossier-stat-num {
+  display: block;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-pure);
+}
+
+.dossier-stat-label {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dossier-footer {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dossier-footer-label {
+  color: var(--gold-primary);
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.dossier-footer-val {
+  color: var(--text-body);
+}
+
 .map-tooltip {
   position: absolute;
   background: rgba(10, 20, 15, 0.97);
   border: 1px solid var(--gold-primary);
   border-radius: var(--radius-xs);
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem;
   color: var(--text-heading);
-  font-size: 0.82rem;
-  line-height: 1.5;
+  font-size: 0.78rem;
+  line-height: 1.4;
   pointer-events: none;
   z-index: 50;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
-  min-width: 200px;
-  max-width: 280px;
+  min-width: 160px;
+  max-width: 220px;
   backdrop-filter: blur(4px);
 }
 

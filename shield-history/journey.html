@@ -153,6 +153,41 @@
         <svg id="journeyMap" viewBox="0 0 1000 520" xmlns="http://www.w3.org/2000/svg">
           <!-- Generated dynamically by journey.js -->
         </svg>
+
+        <!-- Anchored Cartographic Dossier Card (Click on any country dot) -->
+        <div id="mapDossier" class="map-dossier" style="display:none;" role="dialog" aria-label="Country Information">
+          <button class="dossier-close" id="dossierClose" aria-label="Close information">&times;</button>
+          <div class="dossier-header">
+            <span class="dossier-flag" id="dossierFlag">🇿🇦</span>
+            <div class="dossier-title-wrap">
+              <h4 class="dossier-title" id="dossierTitle">South Africa</h4>
+              <div id="dossierBadge" class="dossier-badge custodian">&starf; Reigning Custodian</div>
+            </div>
+          </div>
+          <div class="dossier-stats-grid">
+            <div class="dossier-stat-box">
+              <span class="dossier-stat-num" id="dossierMatches">87</span>
+              <span class="dossier-stat-label" id="dossierMatchLabel">Tests Hosted</span>
+            </div>
+            <div class="dossier-stat-box">
+              <span class="dossier-stat-num" id="dossierCrossings">34</span>
+              <span class="dossier-stat-label">Crossings</span>
+            </div>
+            <div class="dossier-stat-box">
+              <span class="dossier-stat-num" id="dossierFirst">1928</span>
+              <span class="dossier-stat-label">First Arrival</span>
+            </div>
+            <div class="dossier-stat-box">
+              <span class="dossier-stat-num" id="dossierLatest">2026</span>
+              <span class="dossier-stat-label">Latest Test</span>
+            </div>
+          </div>
+          <div class="dossier-footer" id="dossierVenueRow">
+            <span class="dossier-footer-label">Historic Grounds:</span>
+            <span class="dossier-footer-val" id="dossierVenue">Ellis Park / Loftus Versfeld</span>
+          </div>
+        </div>
+
         <div id="mapTooltip" class="map-tooltip" style="display:none;"></div>
       </div>
 

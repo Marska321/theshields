@@ -8,28 +8,30 @@
     countryStats: {},
     routeCounts: {},
     firstVisits: {},
-    tooltip: null
+    tooltip: null,
+    pinnedCountry: null
   };
 
   // Mathematically accurate Miller Cylindrical Projected Coordinates (1000 x 520)
+  // Perfectly calibrated to give clean visual breathing room in Europe
   const COUNTRY_COORDS = {
-    SCO: { x: 491.0, y: 162.2, name: 'Scotland', venue: 'Murrayfield, Edinburgh' },
-    ENG: { x: 499.1, y: 178.1, name: 'England', venue: 'Twickenham, London' },
-    WAL: { x: 491.2, y: 178.0, name: 'Wales', venue: 'Millennium Stadium, Cardiff' },
-    IRE: { x: 482.7, y: 171.6, name: 'Ireland', venue: 'Aviva / Lansdowne Rd, Dublin' },
-    FRA: { x: 506.6, y: 186.7, name: 'France', venue: 'Stade de France, Paris' },
+    SCO: { x: 491.0, y: 157.0, name: 'Scotland', venue: 'Murrayfield, Edinburgh' },
+    ENG: { x: 501.5, y: 178.5, name: 'England', venue: 'Twickenham, London' },
+    WAL: { x: 488.0, y: 178.5, name: 'Wales', venue: 'Millennium Stadium, Cardiff' },
+    IRE: { x: 479.0, y: 169.0, name: 'Ireland', venue: 'Aviva / Lansdowne Rd, Dublin' },
+    FRA: { x: 508.5, y: 191.0, name: 'France', venue: 'Stade de France, Paris' },
+    NED: { x: 515.5, y: 173.0, name: 'Netherlands', venue: 'Nationaal Rugby Centrum, Amsterdam' },
+    ITA: { x: 534.6, y: 209.2, name: 'Italy', venue: 'Stadio Olimpico, Rome' },
+    ROM: { x: 572.4, y: 201.2, name: 'Romania', venue: 'Arcul de Triumf, Bucharest' },
     SAF: { x: 577.9, y: 394.0, name: 'South Africa', venue: 'Ellis Park / Loftus Versfeld' },
     NZL: { x: 985.4, y: 424.6, name: 'New Zealand', venue: 'Eden Park, Auckland' },
     AUS: { x: 919.6, y: 415.7, name: 'Australia', venue: 'Stadium Australia, Sydney' },
     ARG: { x: 337.4, y: 418.0, name: 'Argentina', venue: 'José Amalfitani, Buenos Aires' },
     JAP: { x: 887.6, y: 228.2, name: 'Japan', venue: 'Ajinomoto Stadium, Tokyo' },
-    ITA: { x: 534.6, y: 209.2, name: 'Italy', venue: 'Stadio Olimpico, Rome' },
-    ROM: { x: 572.4, y: 201.2, name: 'Romania', venue: 'Arcul de Triumf, Bucharest' },
+    HKG: { x: 817.2, y: 265.9, name: 'Hong Kong', venue: 'Hong Kong Stadium' },
     CAN: { x: 279.6, y: 203.1, name: 'Canada', venue: "Fletcher's Fields, Markham" },
     USA: { x: 256.6, y: 209.4, name: 'United States', venue: 'Soldier Field, Chicago' },
-    NED: { x: 513.6, y: 175.0, name: 'Netherlands', venue: 'Nationaal Rugby Centrum, Amsterdam' },
-    HKG: { x: 817.2, y: 265.9, name: 'Hong Kong', venue: 'Hong Kong Stadium' },
-    GBR: { x: 499.7, y: 178.0, name: 'Great Britain', venue: 'London' }
+    GBR: { x: 501.5, y: 178.5, name: 'Great Britain', venue: 'London' }
   };
 
   // Region ViewBox Presets
@@ -111,6 +113,19 @@
 
     if (tabRaeburn) tabRaeburn.addEventListener('click', () => setShield('raeburn'));
     if (tabUtrecht) tabUtrecht.addEventListener('click', () => setShield('utrecht'));
+
+    const dossierClose = document.getElementById('dossierClose');
+    if (dossierClose) {
+      dossierClose.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeDossier();
+      });
+    }
+
+    // Close dossier on Escape
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDossier();
+    });
   }
 
   function setShield(shieldName) {
@@ -133,6 +148,7 @@
       }
     }
 
+    closeDossier();
     updateView();
   }
 
@@ -155,14 +171,107 @@
     const wrapper = document.querySelector('.map-wrapper');
     if (!wrapper) return;
     const rect = wrapper.getBoundingClientRect();
-    const x = e.clientX - rect.left + 15;
-    const y = e.clientY - rect.top - 20;
+    const x = e.clientX - rect.left + 12;
+    const y = e.clientY - rect.top - 28;
 
-    const maxX = rect.width - tooltip.offsetWidth - 15;
-    const maxY = rect.height - tooltip.offsetHeight - 15;
+    const maxX = rect.width - tooltip.offsetWidth - 12;
+    const maxY = rect.height - tooltip.offsetHeight - 12;
 
     tooltip.style.left = Math.max(10, Math.min(maxX, x)) + 'px';
     tooltip.style.top = Math.max(10, Math.min(maxY, y)) + 'px';
+  }
+
+  function openDossier(code) {
+    const dossier = document.getElementById('mapDossier');
+    const wrapper = document.querySelector('.map-wrapper');
+    const svg = document.getElementById('journeyMap');
+    if (!dossier || !wrapper || !svg) return;
+
+    const stat = state.countryStats[code];
+    const pos = COUNTRY_COORDS[code];
+    if (!stat || !pos) return;
+
+    state.pinnedCountry = code;
+
+    // Deselect other markers & highlight clicked
+    document.querySelectorAll('.map-marker-group').forEach(m => m.classList.remove('active'));
+    const markerEl = document.querySelector(`.map-marker-group[data-code="${code}"]`);
+    if (markerEl) markerEl.classList.add('active');
+
+    // Highlight country polygon
+    document.querySelectorAll('.map-country').forEach(c => c.classList.remove('highlighted'));
+    const poly = document.querySelector(`.map-country[data-country="${code}"]`);
+    if (poly) poly.classList.add('highlighted');
+
+    // Data lookup
+    const d = state.data[state.shield];
+    const latestReign = d && d.R ? d.R[d.R.length - 1] : null;
+    const currentHolder = latestReign ? latestReign.cd : 'SAF';
+    const isHolder = code === currentHolder || (code === 'GBR' && ['ENG', 'SCO', 'WAL'].includes(currentHolder));
+
+    const el = (id) => document.getElementById(id);
+    if (el('dossierFlag')) el('dossierFlag').textContent = getFlag(code);
+    if (el('dossierTitle')) el('dossierTitle').textContent = stat.name;
+    if (el('dossierBadge')) {
+      const badge = el('dossierBadge');
+      if (isHolder) {
+        badge.className = 'dossier-badge custodian';
+        badge.innerHTML = '&starf; Reigning Custodian';
+      } else {
+        badge.className = 'dossier-badge';
+        badge.textContent = 'Historic Host Nation';
+      }
+    }
+    if (el('dossierMatches')) el('dossierMatches').textContent = stat.matchesHosted;
+    if (el('dossierMatchLabel')) el('dossierMatchLabel').textContent = state.shield === 'raeburn' ? 'Tests Hosted' : 'Reigns Held';
+    if (el('dossierCrossings')) el('dossierCrossings').textContent = stat.visitCount;
+    if (el('dossierFirst')) el('dossierFirst').textContent = formatDate(stat.firstVisit);
+    if (el('dossierLatest')) el('dossierLatest').textContent = formatDate(stat.lastVisit);
+    if (el('dossierVenue')) el('dossierVenue').textContent = pos.venue || 'National Stadium';
+
+    // Position anchored to marker
+    updateDossierPosition();
+    dossier.style.display = 'block';
+
+    if (state.tooltip) state.tooltip.style.display = 'none';
+  }
+
+  function closeDossier() {
+    state.pinnedCountry = null;
+    const dossier = document.getElementById('mapDossier');
+    if (dossier) dossier.style.display = 'none';
+    document.querySelectorAll('.map-marker-group').forEach(m => m.classList.remove('active'));
+    document.querySelectorAll('.map-country').forEach(c => c.classList.remove('highlighted'));
+  }
+
+  function updateDossierPosition() {
+    if (!state.pinnedCountry) return;
+    const dossier = document.getElementById('mapDossier');
+    const wrapper = document.querySelector('.map-wrapper');
+    const svg = document.getElementById('journeyMap');
+    if (!dossier || !wrapper || !svg) return;
+
+    const pos = COUNTRY_COORDS[state.pinnedCountry];
+    if (!pos) return;
+
+    const wrapRect = wrapper.getBoundingClientRect();
+    const svgRect = svg.getBoundingClientRect();
+    const view = viewState.current;
+
+    // Convert SVG coordinates to screen coordinates inside container
+    const markerScreenX = svgRect.left + ((pos.x - view.x) / view.w) * svgRect.width - wrapRect.left;
+    const markerScreenY = svgRect.top + ((pos.y - view.y) / view.h) * svgRect.height - wrapRect.top;
+
+    const cardW = 280;
+    const cardH = 220;
+
+    const left = Math.max(14, Math.min(wrapRect.width - cardW - 14, markerScreenX - cardW / 2));
+    const top = markerScreenY > (cardH + 25) 
+      ? markerScreenY - cardH - 18 
+      : Math.min(wrapRect.height - cardH - 14, markerScreenY + 20);
+
+    dossier.style.left = left.toFixed(1) + 'px';
+    dossier.style.top = top.toFixed(1) + 'px';
   }
 
   function updateView() {
@@ -409,7 +518,6 @@
     svg.appendChild(ocean);
 
     // Navigational Graticule Lines
-    // Longitudes every 30 degrees (from -180 to 180)
     for (let deg = -150; deg <= 150; deg += 30) {
       const x = ((deg + 180) / 360) * 1000;
       const vLine = createSVG('line');
@@ -425,7 +533,7 @@
       svg.appendChild(vLine);
     }
 
-    // Parallels (60N, 30N, Equator 0, 30S)
+    // Parallels
     const parallels = [
       { y: 153.9, label: '60° N' },
       { y: 228.2, label: '30° N' },
@@ -451,7 +559,7 @@
     eqLabel.textContent = '• EQUATOR 0° •';
     svg.appendChild(eqLabel);
 
-    // Tropic of Cancer (23° 26' N -> y ≈ 245.5)
+    // Tropic of Cancer
     const cancer = createSVG('line');
     cancer.setAttribute('x1', '0');
     cancer.setAttribute('y1', '245.5');
@@ -467,7 +575,7 @@
     cancerText.textContent = 'TROPIC OF CANCER 23° 26\' N';
     svg.appendChild(cancerText);
 
-    // Tropic of Capricorn (23° 26' S -> y ≈ 355.2)
+    // Tropic of Capricorn
     const capricorn = createSVG('line');
     capricorn.setAttribute('x1', '0');
     capricorn.setAttribute('y1', '355.2');
@@ -483,7 +591,7 @@
     capText.textContent = 'TROPIC OF CAPRICORN 23° 26\' S';
     svg.appendChild(capText);
 
-    // Prime Meridian Label
+    // Prime Meridian
     const pmText = createSVG('text');
     pmText.setAttribute('x', '500');
     pmText.setAttribute('y', '15');
@@ -498,7 +606,6 @@
       land.setAttribute('class', 'map-landmass');
       svg.appendChild(land);
 
-      // Sovereign Boundaries
       if (window.MAP_DATA.borders) {
         const borders = createSVG('path');
         borders.setAttribute('d', window.MAP_DATA.borders);
@@ -525,20 +632,25 @@
         path.setAttribute('class', 'map-country');
         path.setAttribute('data-country', cCode);
 
-        // Current custodian styling
         if (cCode === currentHolder || (cCode === 'GBR' && ['ENG', 'SCO', 'WAL'].includes(currentHolder))) {
           path.classList.add('current-custodian');
         }
 
+        path.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const targetCode = (cCode === 'GBR') ? 'ENG' : cCode;
+          openDossier(targetCode);
+        });
+
         path.addEventListener('mouseenter', () => {
-          path.classList.add('highlighted');
-          const marker = document.querySelector(`.map-marker-group[data-code="${cCode}"]`);
-          if (marker) marker.dispatchEvent(new MouseEvent('mouseenter'));
+          if (!state.pinnedCountry) {
+            path.classList.add('highlighted');
+          }
         });
         path.addEventListener('mouseleave', () => {
-          path.classList.remove('highlighted');
-          const marker = document.querySelector(`.map-marker-group[data-code="${cCode}"]`);
-          if (marker) marker.dispatchEvent(new MouseEvent('mouseleave'));
+          if (state.pinnedCountry !== cCode) {
+            path.classList.remove('highlighted');
+          }
         });
 
         countriesGroup.appendChild(path);
@@ -572,24 +684,26 @@
         const strokeW = freq > 20 ? '2.4' : (freq > 8 ? '1.8' : '1.2');
         path.setAttribute('stroke-width', strokeW);
 
-        // Tooltip on arc
         path.addEventListener('mouseenter', (e) => {
+          if (state.pinnedCountry) return;
           path.classList.add('highlighted');
           const tooltip = state.tooltip;
           if (!tooltip) return;
           tooltip.innerHTML = `
-            <div style="font-weight:700; color:var(--gold-light); margin-bottom:4px;">
+            <div style="font-weight:700; color:var(--gold-light); margin-bottom:3px;">
               ${getFlag(c1)} ${getNationName(c1)} &harr; ${getFlag(c2)} ${getNationName(c2)}
             </div>
-            <div class="tt-stat"><span class="tt-stat-label">Title defences:</span> <span class="tt-stat-val">${freq} times</span></div>
+            <div style="font-size:0.75rem; color:var(--text-body);">${freq} Title Defences Traversed</div>
           `;
           tooltip.style.display = 'block';
           positionTooltip(e);
         });
-        path.addEventListener('mousemove', positionTooltip);
+        path.addEventListener('mousemove', (e) => {
+          if (!state.pinnedCountry) positionTooltip(e);
+        });
         path.addEventListener('mouseleave', () => {
           path.classList.remove('highlighted');
-          if (state.tooltip) state.tooltip.style.display = 'none';
+          if (state.tooltip && !state.pinnedCountry) state.tooltip.style.display = 'none';
         });
 
         arcsGroup.appendChild(path);
@@ -606,14 +720,18 @@
       const pos = COUNTRY_COORDS[stat.code];
       if (!pos) return;
 
+      const isHolder = (stat.code === currentHolder);
       const g = createSVG('g');
-      g.setAttribute('class', 'map-marker-group');
+      g.setAttribute('class', 'map-marker-group' + (isHolder ? ' map-marker-custodian' : ''));
       g.setAttribute('data-code', stat.code);
 
-      const r = Math.max(5.5, Math.min(16, Math.sqrt(stat.matchesHosted) * 1.6));
+      // Sizing:
+      // Reigning custodian gets a prominent hero dot (radius 10px)
+      // All other countries get sleek, refined, non-overlapping dots (radius 3.8px)
+      const r = isHolder ? 10.0 : 3.8;
 
-      // Current holder gets animated radar waves
-      if (stat.code === currentHolder) {
+      // Current holder gets animated expanding emerald radar rings
+      if (isHolder) {
         const pulse = createSVG('circle');
         pulse.setAttribute('cx', pos.x);
         pulse.setAttribute('cy', pos.y);
@@ -625,8 +743,8 @@
         const animR = createSVG('animate');
         animR.setAttribute('attributeName', 'r');
         animR.setAttribute('from', r);
-        animR.setAttribute('to', (r + 26).toString());
-        animR.setAttribute('dur', '2s');
+        animR.setAttribute('to', '34');
+        animR.setAttribute('dur', '2.2s');
         animR.setAttribute('repeatCount', 'indefinite');
         pulse.appendChild(animR);
 
@@ -634,7 +752,7 @@
         animO.setAttribute('attributeName', 'opacity');
         animO.setAttribute('from', '0.9');
         animO.setAttribute('to', '0');
-        animO.setAttribute('dur', '2s');
+        animO.setAttribute('dur', '2.2s');
         animO.setAttribute('repeatCount', 'indefinite');
         pulse.appendChild(animO);
 
@@ -643,12 +761,22 @@
 
       const colors = getColors(stat.code);
 
-      // Outer drop shadow ring
+      // Invisible hit area for effortless clicking/tapping on touch & mouse
+      const hitArea = createSVG('circle');
+      hitArea.setAttribute('cx', pos.x);
+      hitArea.setAttribute('cy', pos.y);
+      hitArea.setAttribute('r', isHolder ? '18' : '13');
+      hitArea.setAttribute('fill', 'transparent');
+      hitArea.setAttribute('stroke', 'none');
+      hitArea.setAttribute('class', 'map-marker-hit');
+      g.appendChild(hitArea);
+
+      // Dark drop shadow backing ring
       const baseRing = createSVG('circle');
       baseRing.setAttribute('cx', pos.x);
       baseRing.setAttribute('cy', pos.y);
       baseRing.setAttribute('r', (r + 1.2).toString());
-      baseRing.setAttribute('fill', '#0A140F');
+      baseRing.setAttribute('fill', '#07110C');
       g.appendChild(baseRing);
 
       // Main Coin Disc
@@ -657,70 +785,81 @@
       disc.setAttribute('cy', pos.y);
       disc.setAttribute('r', r);
       disc.setAttribute('fill', colors[0] || 'var(--gold-primary)');
-      disc.setAttribute('stroke', stat.code === currentHolder ? '#10B981' : '#FFFFFF');
-      disc.setAttribute('stroke-width', stat.code === currentHolder ? '2' : '1.5');
+      disc.setAttribute('stroke', isHolder ? '#10B981' : '#FFFFFF');
+      disc.setAttribute('stroke-width', isHolder ? '2.2' : '1.2');
+      disc.setAttribute('class', 'map-marker-disc');
       g.appendChild(disc);
 
-      // Secondary color center core
-      if (colors[1] && r > 7) {
+      // Secondary color center core (for holder)
+      if (isHolder) {
         const core = createSVG('circle');
         core.setAttribute('cx', pos.x);
         core.setAttribute('cy', pos.y);
-        core.setAttribute('r', (r * 0.45).toFixed(1));
-        core.setAttribute('fill', colors[1]);
+        core.setAttribute('r', '4.5');
+        core.setAttribute('fill', colors[1] || '#FFB81C');
         g.appendChild(core);
       }
 
-      // Nation label beneath major nations
-      if (stat.matchesHosted >= 10 || stat.code === currentHolder) {
+      // ONLY the reigning custodian gets a permanent label on the global map
+      // (This completely eliminates the clutter/overlap in Europe!)
+      if (isHolder) {
         const label = createSVG('text');
         label.setAttribute('x', pos.x);
-        label.setAttribute('y', (pos.y + r + 10).toFixed(1));
-        label.setAttribute('class', 'map-marker-label');
-        label.textContent = stat.name.toUpperCase();
+        label.setAttribute('y', (pos.y + r + 13).toFixed(1));
+        label.setAttribute('class', 'map-custodian-label');
+        label.textContent = `★ ${stat.name.toUpperCase()} (CUSTODIAN)`;
         g.appendChild(label);
       }
 
-      // Tooltip Events
+      // CLICK: Open & Pin the Stable Dossier Card
+      g.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openDossier(stat.code);
+      });
+
+      // HOVER: If no dossier is open, show lightweight tooltip
       g.addEventListener('mouseenter', (e) => {
-        const tooltip = state.tooltip;
-        if (!tooltip) return;
-        const flag = getFlag(stat.code);
-        const matchLabel = state.shield === 'raeburn' ? 'Matches hosted' : 'Reigns held';
-        const venueInfo = pos.venue ? `<div class="tt-stat"><span class="tt-stat-label">Historic Venue:</span> <span class="tt-stat-val">${pos.venue}</span></div>` : '';
-        const isHolder = stat.code === currentHolder ? '<div style="margin-top:6px; font-weight:700; color:#10B981;">&#x2714; REIGNING CUSTODIAN</div>' : '';
-
-        tooltip.innerHTML = `
-          <div style="font-weight:700; margin-bottom:6px; font-size:0.95rem;">
-            <span class="tt-flag" style="font-size:1.15rem; margin-right:6px;">${flag}</span>
-            <span class="tt-name">${stat.name}</span>
-          </div>
-          <div class="tt-stat"><span class="tt-stat-label">${matchLabel}:</span> <span class="tt-stat-val">${stat.matchesHosted}</span></div>
-          <div class="tt-stat"><span class="tt-stat-label">First visit:</span> <span class="tt-stat-val">${formatDate(stat.firstVisit)}</span></div>
-          <div class="tt-stat"><span class="tt-stat-label">Last visit:</span> <span class="tt-stat-val">${formatDate(stat.lastVisit)}</span></div>
-          <div class="tt-stat"><span class="tt-stat-label">Border crossings:</span> <span class="tt-stat-val">${stat.visitCount}</span></div>
-          ${venueInfo}
-          ${isHolder}
-        `;
-        tooltip.style.display = 'block';
-        positionTooltip(e);
-
-        // Highlight country polygon
+        if (!state.pinnedCountry) {
+          const tooltip = state.tooltip;
+          if (tooltip) {
+            const flag = getFlag(stat.code);
+            const matchLabel = state.shield === 'raeburn' ? 'Tests' : 'Reigns';
+            tooltip.innerHTML = `<strong>${flag} ${stat.name}</strong> &bull; ${stat.matchesHosted} ${matchLabel}`;
+            tooltip.style.display = 'block';
+            positionTooltip(e);
+          }
+        }
         const poly = document.querySelector(`.map-country[data-country="${stat.code}"]`);
         if (poly) poly.classList.add('highlighted');
       });
 
-      g.addEventListener('mousemove', positionTooltip);
+      g.addEventListener('mousemove', (e) => {
+        if (!state.pinnedCountry) {
+          positionTooltip(e);
+        }
+      });
+
       g.addEventListener('mouseleave', () => {
-        if (state.tooltip) state.tooltip.style.display = 'none';
-        const poly = document.querySelector(`.map-country[data-country="${stat.code}"]`);
-        if (poly) poly.classList.remove('highlighted');
+        if (state.tooltip && !state.pinnedCountry) {
+          state.tooltip.style.display = 'none';
+        }
+        if (state.pinnedCountry !== stat.code) {
+          const poly = document.querySelector(`.map-country[data-country="${stat.code}"]`);
+          if (poly) poly.classList.remove('highlighted');
+        }
       });
 
       markersGroup.appendChild(g);
     });
 
     svg.appendChild(markersGroup);
+
+    // Clicking map background closes any pinned dossier
+    svg.addEventListener('click', (e) => {
+      if (!e.target.closest('.map-marker-group') && !e.target.closest('.map-country')) {
+        closeDossier();
+      }
+    });
   }
 
   function setupPanZoom() {
@@ -767,7 +906,7 @@
     let startView = null;
 
     container.addEventListener('mousedown', (e) => {
-      if (e.button !== 0 || e.target.closest('button')) return;
+      if (e.button !== 0 || e.target.closest('button') || e.target.closest('#mapDossier')) return;
       isDown = true;
       startClientX = e.clientX;
       startClientY = e.clientY;
@@ -786,6 +925,7 @@
       viewState.current.x = Math.max(-150, Math.min(900, startView.x - dx));
       viewState.current.y = Math.max(-100, Math.min(450, startView.y - dy));
       svg.setAttribute('viewBox', `${viewState.current.x} ${viewState.current.y} ${viewState.current.w} ${viewState.current.h}`);
+      updateDossierPosition();
     });
 
     window.addEventListener('mouseup', () => {
@@ -829,7 +969,7 @@
     if (viewState.animId) cancelAnimationFrame(viewState.animId);
     const start = { ...viewState.current };
     const startTime = performance.now();
-    const duration = 450;
+    const duration = 400;
 
     function step(now) {
       const elapsed = now - startTime;
@@ -845,6 +985,7 @@
       if (svg) {
         svg.setAttribute('viewBox', `${viewState.current.x.toFixed(1)} ${viewState.current.y.toFixed(1)} ${viewState.current.w.toFixed(1)} ${viewState.current.h.toFixed(1)}`);
       }
+      updateDossierPosition();
 
       if (progress < 1) {
         viewState.animId = requestAnimationFrame(step);
@@ -964,17 +1105,25 @@
         </div>
       `;
 
+      card.addEventListener('click', () => {
+        openDossier(stat.code);
+        const mapContainer = document.getElementById('mapContainer');
+        if (mapContainer) mapContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+
       card.addEventListener('mouseenter', () => {
         const poly = document.querySelector(`.map-country[data-country="${stat.code}"]`);
         if (poly) poly.classList.add('highlighted');
         const marker = document.querySelector(`.map-marker-group[data-code="${stat.code}"]`);
-        if (marker) marker.style.transform = 'scale(1.25)';
+        if (marker) marker.classList.add('active');
       });
       card.addEventListener('mouseleave', () => {
-        const poly = document.querySelector(`.map-country[data-country="${stat.code}"]`);
-        if (poly) poly.classList.remove('highlighted');
-        const marker = document.querySelector(`.map-marker-group[data-code="${stat.code}"]`);
-        if (marker) marker.style.transform = '';
+        if (state.pinnedCountry !== stat.code) {
+          const poly = document.querySelector(`.map-country[data-country="${stat.code}"]`);
+          if (poly) poly.classList.remove('highlighted');
+          const marker = document.querySelector(`.map-marker-group[data-code="${stat.code}"]`);
+          if (marker) marker.classList.remove('active');
+        }
       });
 
       grid.appendChild(card);
