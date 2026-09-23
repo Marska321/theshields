@@ -127,8 +127,30 @@
         </div>
       </div>
 
-      <div class="map-wrapper">
-        <svg id="journeyMap" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
+      <!-- Cartographic Control Bar -->
+      <div class="map-toolbar">
+        <div class="map-toolbar-meta">
+          <span class="toolbar-label">CARTOGRAPHIC PROJECTION</span>
+          <span class="toolbar-sep">&bull;</span>
+          <span class="toolbar-detail">Miller Cylindrical &bull; Natural Earth 1:110M</span>
+        </div>
+        <div class="map-toolbar-actions">
+          <div class="map-region-buttons" role="group" aria-label="Region Presets">
+            <button class="map-btn active" data-region="world" title="View Full Globe">🌍 Global</button>
+            <button class="map-btn" data-region="europe" title="Focus on British Isles &amp; Western Europe">🇬🇧 Europe &amp; UK</button>
+            <button class="map-btn" data-region="south" title="Focus on South Africa, New Zealand, Australia, Argentina">🏉 Southern Hemisphere</button>
+            <button class="map-btn" data-region="pacific" title="Focus on Japan, Hong Kong, Australia, NZ">🌏 Pacific Rim</button>
+          </div>
+          <div class="map-zoom-buttons" role="group" aria-label="Zoom Controls">
+            <button class="map-icon-btn" id="zoomIn" title="Zoom In" aria-label="Zoom In">+</button>
+            <button class="map-icon-btn" id="zoomOut" title="Zoom Out" aria-label="Zoom Out">&minus;</button>
+            <button class="map-icon-btn" id="zoomReset" title="Reset View" aria-label="Reset View">&#x21bb;</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="map-wrapper" id="mapContainer">
+        <svg id="journeyMap" viewBox="0 0 1000 520" xmlns="http://www.w3.org/2000/svg">
           <!-- Generated dynamically by journey.js -->
         </svg>
         <div id="mapTooltip" class="map-tooltip" style="display:none;"></div>
@@ -210,6 +232,7 @@
   <!-- Scripts -->
   <script src="data/raeburn-data.js"></script>
   <script src="data/utrecht-data.js"></script>
+  <script src="data/map-data.js"></script>
   <script src="js/journey.js"></script>
   <script>
     window.addEventListener("load", function () {

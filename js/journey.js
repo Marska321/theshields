@@ -11,39 +11,42 @@
     tooltip: null
   };
 
+  // Mathematically accurate Miller Cylindrical Projected Coordinates (1000 x 520)
   const COUNTRY_COORDS = {
-    SCO: { x: 486, y: 95, name: 'Scotland' },
-    ENG: { x: 497, y: 107, name: 'England' },
-    WAL: { x: 490, y: 108, name: 'Wales' },
-    IRE: { x: 481, y: 102, name: 'Ireland' },
-    FRA: { x: 506, y: 115, name: 'France' },
-    NED: { x: 512, y: 100, name: 'Netherlands' },
-    GBR: { x: 495, y: 103, name: 'Great Britain' },
-    SAF: { x: 578, y: 323, name: 'South Africa' },
-    NZL: { x: 980, y: 368, name: 'New Zealand' },
-    AUS: { x: 920, y: 344, name: 'Australia' },
-    ARG: { x: 338, y: 346, name: 'Argentina' },
-    JAP: { x: 888, y: 151, name: 'Japan' },
-    HKG: { x: 808, y: 196, name: 'Hong Kong' },
-    ITA: { x: 535, y: 134, name: 'Italy' },
-    USA: { x: 257, y: 134, name: 'United States' },
-    CAN: { x: 296, y: 124, name: 'Canada' },
-    ROM: { x: 573, y: 127, name: 'Romania' },
+    SCO: { x: 491.0, y: 162.2, name: 'Scotland', venue: 'Murrayfield, Edinburgh' },
+    ENG: { x: 499.1, y: 178.1, name: 'England', venue: 'Twickenham, London' },
+    WAL: { x: 491.2, y: 178.0, name: 'Wales', venue: 'Millennium Stadium, Cardiff' },
+    IRE: { x: 482.7, y: 171.6, name: 'Ireland', venue: 'Aviva / Lansdowne Rd, Dublin' },
+    FRA: { x: 506.6, y: 186.7, name: 'France', venue: 'Stade de France, Paris' },
+    SAF: { x: 577.9, y: 394.0, name: 'South Africa', venue: 'Ellis Park / Loftus Versfeld' },
+    NZL: { x: 985.4, y: 424.6, name: 'New Zealand', venue: 'Eden Park, Auckland' },
+    AUS: { x: 919.6, y: 415.7, name: 'Australia', venue: 'Stadium Australia, Sydney' },
+    ARG: { x: 337.4, y: 418.0, name: 'Argentina', venue: 'José Amalfitani, Buenos Aires' },
+    JAP: { x: 887.6, y: 228.2, name: 'Japan', venue: 'Ajinomoto Stadium, Tokyo' },
+    ITA: { x: 534.6, y: 209.2, name: 'Italy', venue: 'Stadio Olimpico, Rome' },
+    ROM: { x: 572.4, y: 201.2, name: 'Romania', venue: 'Arcul de Triumf, Bucharest' },
+    CAN: { x: 279.6, y: 203.1, name: 'Canada', venue: "Fletcher's Fields, Markham" },
+    USA: { x: 256.6, y: 209.4, name: 'United States', venue: 'Soldier Field, Chicago' },
+    NED: { x: 513.6, y: 175.0, name: 'Netherlands', venue: 'Nationaal Rugby Centrum, Amsterdam' },
+    HKG: { x: 817.2, y: 265.9, name: 'Hong Kong', venue: 'Hong Kong Stadium' },
+    GBR: { x: 499.7, y: 178.0, name: 'Great Britain', venue: 'London' }
   };
 
-  const CONTINENTS = [
-    'M42,69 L250,50 L347,111 L278,181 L208,200 L167,153 L139,97 Z',
-    'M306,222 L403,264 L394,306 L347,361 L311,394 L292,375 L278,278 Z',
-    'M453,153 L589,164 L639,222 L600,306 L578,347 L533,333 L511,236 L453,211 Z',
-    'M472,147 L486,89 L542,69 L583,78 L597,111 L569,144 L542,144 Z',
-    'M597,111 L625,100 L667,83 L722,69 L778,56 L833,50 L889,56 L944,78 L972,97 L944,139 L889,153 L833,222 L778,236 L722,222 L667,194 L639,167 Z',
-    'M814,308 L847,283 L889,289 L917,308 L911,347 L889,353 L847,344 Z',
-    'M958,358 L972,344 L981,353 L978,375 L969,381 Z',
-    'M878,125 L886,114 L892,122 L889,139 L883,147 Z',
-    'M475,97 L481,89 L489,94 L491,106 L484,112 L476,108 Z'
-  ];
+  // Region ViewBox Presets
+  const REGION_VIEWS = {
+    world: { x: 0, y: 0, w: 1000, h: 520 },
+    europe: { x: 440, y: 135, w: 160, h: 100 },
+    south: { x: 260, y: 335, w: 740, h: 170 },
+    pacific: { x: 740, y: 155, w: 270, h: 325 }
+  };
 
-  // Exact physical country code for all 112 match venues in Raeburn Shield history
+  const viewState = {
+    current: { x: 0, y: 0, w: 1000, h: 520 },
+    target: { x: 0, y: 0, w: 1000, h: 520 },
+    animId: null
+  };
+
+  // Physical host country mapping for all 112 match venues
   const VENUE_COUNTRY_MAP = [
     'JAP', 'NZL', 'NZL', 'AUS', 'IRE', 'IRE', 'FRA', 'ENG', 'SAF', 'AUS',
     'ROM', 'CAN', 'WAL', 'NZL', 'USA', 'AUS', 'AUS', 'AUS', 'IRE', 'SAF',
@@ -98,6 +101,7 @@
     };
     setupTooltip();
     bindEvents();
+    setupPanZoom();
     updateView();
   }
 
@@ -128,7 +132,37 @@
         tabRaeburn.setAttribute('aria-selected', 'false');
       }
     }
+
     updateView();
+  }
+
+  function setupTooltip() {
+    let tooltip = document.getElementById('mapTooltip');
+    if (!tooltip) {
+      tooltip = document.createElement('div');
+      tooltip.id = 'mapTooltip';
+      tooltip.className = 'map-tooltip';
+      tooltip.style.display = 'none';
+      const wrapper = document.querySelector('.map-wrapper');
+      if (wrapper) wrapper.appendChild(tooltip);
+    }
+    state.tooltip = tooltip;
+  }
+
+  function positionTooltip(e) {
+    const tooltip = state.tooltip;
+    if (!tooltip) return;
+    const wrapper = document.querySelector('.map-wrapper');
+    if (!wrapper) return;
+    const rect = wrapper.getBoundingClientRect();
+    const x = e.clientX - rect.left + 15;
+    const y = e.clientY - rect.top - 20;
+
+    const maxX = rect.width - tooltip.offsetWidth - 15;
+    const maxY = rect.height - tooltip.offsetHeight - 15;
+
+    tooltip.style.left = Math.max(10, Math.min(maxX, x)) + 'px';
+    tooltip.style.top = Math.max(10, Math.min(maxY, y)) + 'px';
   }
 
   function updateView() {
@@ -140,21 +174,6 @@
     renderTravelLog();
   }
 
-  function setupTooltip() {
-    state.tooltip = document.getElementById('mapTooltip');
-  }
-
-  function positionTooltip(e) {
-    if (!state.tooltip) return;
-    const wrapper = document.querySelector('.map-wrapper');
-    if (!wrapper) return;
-    const rect = wrapper.getBoundingClientRect();
-    const x = e.clientX - rect.left + 15;
-    const y = e.clientY - rect.top + 15;
-    state.tooltip.style.left = Math.min(x, rect.width - 240) + 'px';
-    state.tooltip.style.top = Math.min(y, rect.height - 120) + 'px';
-  }
-
   function buildJourney() {
     state.journey = [];
     state.countryStats = {};
@@ -164,67 +183,74 @@
     const d = state.data[state.shield];
     if (!d) return;
 
-    let prevCountry = null;
-    const titleChangesCounter = {};
-
-    if (d.R) {
-      d.R.forEach((r, idx) => {
-        if (idx > 0 && d.R[idx - 1].cd !== r.cd) {
-          titleChangesCounter[r.cd] = (titleChangesCounter[r.cd] || 0) + 1;
-        }
-      });
-    }
-
     if (state.shield === 'raeburn' && d.M) {
+      let prevCountry = null;
+
       d.M.forEach((m, idx) => {
         const date = m[0];
+        const homeCode = m[1];
+        const awayCode = m[2];
         const venueIdx = m[5];
-        // Physical country of the match venue
-        const host = (venueIdx >= 0 && venueIdx < VENUE_COUNTRY_MAP.length)
-          ? VENUE_COUNTRY_MAP[venueIdx]
-          : m[1];
-        const venue = d.V[venueIdx] || 'Unknown Venue';
+        const reignIdx = m[7];
+        const reign = d.R[reignIdx];
+        const holderCode = reign ? reign.cd : homeCode;
 
-        if (!state.countryStats[host]) {
-          state.countryStats[host] = {
-            code: host,
-            name: getNationName(host),
+        let hostCountry = VENUE_COUNTRY_MAP[venueIdx];
+        if (!hostCountry) hostCountry = homeCode;
+
+        if (!state.countryStats[hostCountry]) {
+          state.countryStats[hostCountry] = {
+            code: hostCountry,
+            name: getNationName(hostCountry),
             matchesHosted: 0,
             firstVisit: date,
             lastVisit: date,
             visitCount: 0,
-            titleChanges: titleChangesCounter[host] || 0
+            titleChanges: 0
           };
-          state.firstVisits[host] = date;
         }
 
-        state.countryStats[host].matchesHosted++;
-        state.countryStats[host].lastVisit = date;
+        const cs = state.countryStats[hostCountry];
+        cs.matchesHosted++;
+        cs.lastVisit = date;
 
-        if (prevCountry && prevCountry !== host) {
-          state.countryStats[host].visitCount++;
-          const routeKey = [prevCountry, host].sort().join('-');
+        if (!state.firstVisits[hostCountry]) {
+          state.firstVisits[hostCountry] = date;
+        }
+
+        if (prevCountry && prevCountry !== hostCountry) {
+          cs.visitCount++;
+          const routeKey = [prevCountry, hostCountry].sort().join('-');
           state.routeCounts[routeKey] = (state.routeCounts[routeKey] || 0) + 1;
 
+          const venueName = d.V && d.V[venueIdx] ? d.V[venueIdx] : hostCountry;
           state.journey.push({
             from: prevCountry,
-            to: host,
+            to: hostCountry,
             fromName: getNationName(prevCountry),
-            toName: getNationName(host),
+            toName: getNationName(hostCountry),
             date: date,
-            venue: venue,
-            matchIdx: idx
+            venue: venueName,
+            matchIdx: idx,
+            holder: holderCode
           });
         } else if (!prevCountry) {
-          state.countryStats[host].visitCount++;
+          cs.visitCount++;
         }
-        prevCountry = host;
+
+        const isTitleChange = (idx < d.M.length - 1 && d.M[idx + 1][7] !== reignIdx);
+        if (isTitleChange) {
+          cs.titleChanges++;
+        }
+
+        prevCountry = hostCountry;
       });
+
     } else if (d.R) {
-      // Utrecht or reign-based
+      let prevCountry = null;
       d.R.forEach((r, idx) => {
-        const date = r.g;
         const host = r.cd;
+        const date = r.g;
 
         if (!state.countryStats[host]) {
           state.countryStats[host] = {
@@ -234,16 +260,21 @@
             firstVisit: date,
             lastVisit: date,
             visitCount: 0,
-            titleChanges: titleChangesCounter[host] || 0
+            titleChanges: 0
           };
+        }
+
+        const cs = state.countryStats[host];
+        cs.matchesHosted += (r.m || 1);
+        cs.lastVisit = date;
+        cs.titleChanges++;
+
+        if (!state.firstVisits[host]) {
           state.firstVisits[host] = date;
         }
 
-        state.countryStats[host].matchesHosted++;
-        state.countryStats[host].lastVisit = r.e || date;
-
         if (prevCountry && prevCountry !== host) {
-          state.countryStats[host].visitCount++;
+          cs.visitCount++;
           const routeKey = [prevCountry, host].sort().join('-');
           state.routeCounts[routeKey] = (state.routeCounts[routeKey] || 0) + 1;
 
@@ -268,46 +299,259 @@
     return document.createElementNS('http://www.w3.org/2000/svg', tag);
   }
 
+  function createCompassRose() {
+    const g = createSVG('g');
+    g.setAttribute('class', 'map-compass');
+    g.setAttribute('transform', 'translate(390, 360)');
+    g.setAttribute('opacity', '0.65');
+    
+    const ring1 = createSVG('circle');
+    ring1.setAttribute('r', '26');
+    ring1.setAttribute('fill', 'none');
+    ring1.setAttribute('stroke', '#C5A059');
+    ring1.setAttribute('stroke-width', '0.75');
+    ring1.setAttribute('stroke-opacity', '0.4');
+    g.appendChild(ring1);
+
+    const ring2 = createSVG('circle');
+    ring2.setAttribute('r', '22');
+    ring2.setAttribute('fill', 'none');
+    ring2.setAttribute('stroke', '#C5A059');
+    ring2.setAttribute('stroke-width', '0.5');
+    ring2.setAttribute('stroke-dasharray', '1 2');
+    ring2.setAttribute('stroke-opacity', '0.35');
+    g.appendChild(ring2);
+
+    const star = createSVG('path');
+    star.setAttribute('d', 'M0,-24 L3,-7 L17,-17 L7,-3 L24,0 L7,3 L17,17 L3,7 L0,24 L-3,7 L-17,17 L-7,3 L-24,0 L-7,-3 L-17,-17 L-3,-7 Z');
+    star.setAttribute('fill', 'rgba(197, 160, 89, 0.2)');
+    star.setAttribute('stroke', '#C5A059');
+    star.setAttribute('stroke-width', '0.75');
+    g.appendChild(star);
+
+    const cardinals = [
+      { text: 'N', x: 0, y: -28 },
+      { text: 'S', x: 0, y: 35 },
+      { text: 'E', x: 34, y: 3 },
+      { text: 'W', x: -34, y: 3 }
+    ];
+    cardinals.forEach(c => {
+      const t = createSVG('text');
+      t.setAttribute('x', c.x);
+      t.setAttribute('y', c.y);
+      t.setAttribute('text-anchor', 'middle');
+      t.setAttribute('dominant-baseline', 'central');
+      t.setAttribute('fill', '#E2C889');
+      t.setAttribute('font-family', 'Cinzel, Georgia, serif');
+      t.setAttribute('font-size', '8');
+      t.setAttribute('font-weight', '700');
+      t.textContent = c.text;
+      g.appendChild(t);
+    });
+
+    return g;
+  }
+
   function renderMap() {
     const svg = document.getElementById('journeyMap');
     if (!svg) return;
     svg.innerHTML = '';
+    svg.setAttribute('viewBox', `${viewState.current.x} ${viewState.current.y} ${viewState.current.w} ${viewState.current.h}`);
 
-    // Draw continent background shapes
-    CONTINENTS.forEach(pathStr => {
-      const path = createSVG('path');
-      path.setAttribute('d', pathStr);
-      path.setAttribute('fill', '#2a6b4a');
-      path.setAttribute('opacity', '0.08');
-      svg.appendChild(path);
-    });
+    // Definitions
+    const defs = createSVG('defs');
 
-    // Draw subtle grid lines
-    for (let i = 0; i < 1000; i += 83.33) {
+    // Ocean Gradient
+    const oceanGrad = createSVG('linearGradient');
+    oceanGrad.id = 'oceanGrad';
+    oceanGrad.setAttribute('x1', '0%');
+    oceanGrad.setAttribute('y1', '0%');
+    oceanGrad.setAttribute('x2', '0%');
+    oceanGrad.setAttribute('y2', '100%');
+    const stop1 = createSVG('stop');
+    stop1.setAttribute('offset', '0%');
+    stop1.setAttribute('stop-color', '#091510');
+    const stop2 = createSVG('stop');
+    stop2.setAttribute('offset', '100%');
+    stop2.setAttribute('stop-color', '#050D09');
+    oceanGrad.appendChild(stop1);
+    oceanGrad.appendChild(stop2);
+    defs.appendChild(oceanGrad);
+
+    // Glow Filter
+    const filter = createSVG('filter');
+    filter.id = 'goldGlow';
+    filter.setAttribute('x', '-20%');
+    filter.setAttribute('y', '-20%');
+    filter.setAttribute('width', '140%');
+    filter.setAttribute('height', '140%');
+    const blur = createSVG('feGaussianBlur');
+    blur.setAttribute('stdDeviation', '2.5');
+    blur.setAttribute('result', 'blur');
+    const merge = createSVG('feMerge');
+    const mn1 = createSVG('feMergeNode');
+    mn1.setAttribute('in', 'blur');
+    const mn2 = createSVG('feMergeNode');
+    mn2.setAttribute('in', 'SourceGraphic');
+    merge.appendChild(mn1);
+    merge.appendChild(mn2);
+    filter.appendChild(blur);
+    filter.appendChild(merge);
+    defs.appendChild(filter);
+
+    svg.appendChild(defs);
+
+    // Ocean background
+    const ocean = createSVG('rect');
+    ocean.setAttribute('width', '1000');
+    ocean.setAttribute('height', '520');
+    ocean.setAttribute('fill', 'url(#oceanGrad)');
+    svg.appendChild(ocean);
+
+    // Navigational Graticule Lines
+    // Longitudes every 30 degrees (from -180 to 180)
+    for (let deg = -150; deg <= 150; deg += 30) {
+      const x = ((deg + 180) / 360) * 1000;
       const vLine = createSVG('line');
-      vLine.setAttribute('x1', i.toFixed(1));
+      vLine.setAttribute('x1', x.toFixed(1));
       vLine.setAttribute('y1', '0');
-      vLine.setAttribute('x2', i.toFixed(1));
-      vLine.setAttribute('y2', '500');
-      vLine.setAttribute('stroke', '#ffffff');
-      vLine.setAttribute('stroke-opacity', '0.035');
-      vLine.setAttribute('stroke-width', '1');
+      vLine.setAttribute('x2', x.toFixed(1));
+      vLine.setAttribute('y2', '520');
+      vLine.setAttribute('class', 'map-graticule-line');
+      if (deg === 0) {
+        vLine.setAttribute('stroke', '#C5A059');
+        vLine.setAttribute('stroke-opacity', '0.22');
+      }
       svg.appendChild(vLine);
     }
-    for (let i = 0; i < 500; i += 83.33) {
+
+    // Parallels (60N, 30N, Equator 0, 30S)
+    const parallels = [
+      { y: 153.9, label: '60° N' },
+      { y: 228.2, label: '30° N' },
+      { y: 298.5, label: '• EQUATOR 0° •', isEquator: true },
+      { y: 375.0, label: '30° S' }
+    ];
+
+    parallels.forEach(p => {
       const hLine = createSVG('line');
       hLine.setAttribute('x1', '0');
-      hLine.setAttribute('y1', i.toFixed(1));
+      hLine.setAttribute('y1', p.y.toFixed(1));
       hLine.setAttribute('x2', '1000');
-      hLine.setAttribute('y2', i.toFixed(1));
-      hLine.setAttribute('stroke', '#ffffff');
-      hLine.setAttribute('stroke-opacity', '0.035');
-      hLine.setAttribute('stroke-width', '1');
+      hLine.setAttribute('y2', p.y.toFixed(1));
+      hLine.setAttribute('class', p.isEquator ? 'map-equator' : 'map-graticule-line');
       svg.appendChild(hLine);
+    });
+
+    // Equator Label
+    const eqLabel = createSVG('text');
+    eqLabel.setAttribute('x', '130');
+    eqLabel.setAttribute('y', '294');
+    eqLabel.setAttribute('class', 'map-graticule-text');
+    eqLabel.textContent = '• EQUATOR 0° •';
+    svg.appendChild(eqLabel);
+
+    // Tropic of Cancer (23° 26' N -> y ≈ 245.5)
+    const cancer = createSVG('line');
+    cancer.setAttribute('x1', '0');
+    cancer.setAttribute('y1', '245.5');
+    cancer.setAttribute('x2', '1000');
+    cancer.setAttribute('y2', '245.5');
+    cancer.setAttribute('class', 'map-tropic');
+    svg.appendChild(cancer);
+
+    const cancerText = createSVG('text');
+    cancerText.setAttribute('x', '165');
+    cancerText.setAttribute('y', '241');
+    cancerText.setAttribute('class', 'map-graticule-text');
+    cancerText.textContent = 'TROPIC OF CANCER 23° 26\' N';
+    svg.appendChild(cancerText);
+
+    // Tropic of Capricorn (23° 26' S -> y ≈ 355.2)
+    const capricorn = createSVG('line');
+    capricorn.setAttribute('x1', '0');
+    capricorn.setAttribute('y1', '355.2');
+    capricorn.setAttribute('x2', '1000');
+    capricorn.setAttribute('y2', '355.2');
+    capricorn.setAttribute('class', 'map-tropic');
+    svg.appendChild(capricorn);
+
+    const capText = createSVG('text');
+    capText.setAttribute('x', '175');
+    capText.setAttribute('y', '351');
+    capText.setAttribute('class', 'map-graticule-text');
+    capText.textContent = 'TROPIC OF CAPRICORN 23° 26\' S';
+    svg.appendChild(capText);
+
+    // Prime Meridian Label
+    const pmText = createSVG('text');
+    pmText.setAttribute('x', '500');
+    pmText.setAttribute('y', '15');
+    pmText.setAttribute('class', 'map-graticule-text');
+    pmText.textContent = '0° GREENWICH MERIDIAN';
+    svg.appendChild(pmText);
+
+    // Draw Authentic Natural Earth Landmass
+    if (window.MAP_DATA && window.MAP_DATA.land) {
+      const land = createSVG('path');
+      land.setAttribute('d', window.MAP_DATA.land);
+      land.setAttribute('class', 'map-landmass');
+      svg.appendChild(land);
+
+      // Sovereign Boundaries
+      if (window.MAP_DATA.borders) {
+        const borders = createSVG('path');
+        borders.setAttribute('d', window.MAP_DATA.borders);
+        borders.setAttribute('class', 'map-borders');
+        svg.appendChild(borders);
+      }
     }
 
-    // Draw routes between countries
+    // Antique Compass Rose
+    svg.appendChild(createCompassRose());
+
+    // Visited Sovereign Countries Polygons Layer
+    const d = state.data[state.shield];
+    const latestReign = d && d.R ? d.R[d.R.length - 1] : null;
+    const currentHolder = latestReign ? latestReign.cd : 'SAF';
+
+    if (window.MAP_DATA && window.MAP_DATA.countries) {
+      const countriesGroup = createSVG('g');
+      countriesGroup.id = 'mapCountriesGroup';
+
+      Object.entries(window.MAP_DATA.countries).forEach(([cCode, pathStr]) => {
+        const path = createSVG('path');
+        path.setAttribute('d', pathStr);
+        path.setAttribute('class', 'map-country');
+        path.setAttribute('data-country', cCode);
+
+        // Current custodian styling
+        if (cCode === currentHolder || (cCode === 'GBR' && ['ENG', 'SCO', 'WAL'].includes(currentHolder))) {
+          path.classList.add('current-custodian');
+        }
+
+        path.addEventListener('mouseenter', () => {
+          path.classList.add('highlighted');
+          const marker = document.querySelector(`.map-marker-group[data-code="${cCode}"]`);
+          if (marker) marker.dispatchEvent(new MouseEvent('mouseenter'));
+        });
+        path.addEventListener('mouseleave', () => {
+          path.classList.remove('highlighted');
+          const marker = document.querySelector(`.map-marker-group[data-code="${cCode}"]`);
+          if (marker) marker.dispatchEvent(new MouseEvent('mouseleave'));
+        });
+
+        countriesGroup.appendChild(path);
+      });
+
+      svg.appendChild(countriesGroup);
+    }
+
+    // Great-Circle Travel Arcs
+    const arcsGroup = createSVG('g');
+    arcsGroup.id = 'mapArcsGroup';
     const maxFreq = Math.max(...Object.values(state.routeCounts), 1);
+
     Object.entries(state.routeCounts).forEach(([route, freq]) => {
       const [c1, c2] = route.split('-');
       const p1 = COUNTRY_COORDS[c1];
@@ -315,33 +559,60 @@
       if (p1 && p2) {
         const path = createSVG('path');
         const cx = (p1.x + p2.x) / 2;
-        const cy = ((p1.y + p2.y) / 2) - Math.min(45, Math.max(18, Math.abs(p1.x - p2.x) * 0.12));
+        const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+        const curveOffset = Math.min(50, Math.max(16, dist * 0.16));
+        const cy = Math.min(p1.y, p2.y) - curveOffset;
+
         path.setAttribute('d', `M ${p1.x},${p1.y} Q ${cx},${cy} ${p2.x},${p2.y}`);
-        path.setAttribute('fill', 'none');
-        path.setAttribute('stroke', '#D4AF37');
-        const opacity = 0.12 + (0.5 * (freq / maxFreq));
+        path.setAttribute('class', 'map-arc');
+        path.setAttribute('data-route', route);
+
+        const opacity = 0.16 + (0.64 * (freq / maxFreq));
         path.setAttribute('stroke-opacity', opacity.toFixed(2));
-        const strokeW = freq > 15 ? '2.5' : (freq > 5 ? '1.8' : '1.2');
+        const strokeW = freq > 20 ? '2.4' : (freq > 8 ? '1.8' : '1.2');
         path.setAttribute('stroke-width', strokeW);
-        svg.appendChild(path);
+
+        // Tooltip on arc
+        path.addEventListener('mouseenter', (e) => {
+          path.classList.add('highlighted');
+          const tooltip = state.tooltip;
+          if (!tooltip) return;
+          tooltip.innerHTML = `
+            <div style="font-weight:700; color:var(--gold-light); margin-bottom:4px;">
+              ${getFlag(c1)} ${getNationName(c1)} &harr; ${getFlag(c2)} ${getNationName(c2)}
+            </div>
+            <div class="tt-stat"><span class="tt-stat-label">Title defences:</span> <span class="tt-stat-val">${freq} times</span></div>
+          `;
+          tooltip.style.display = 'block';
+          positionTooltip(e);
+        });
+        path.addEventListener('mousemove', positionTooltip);
+        path.addEventListener('mouseleave', () => {
+          path.classList.remove('highlighted');
+          if (state.tooltip) state.tooltip.style.display = 'none';
+        });
+
+        arcsGroup.appendChild(path);
       }
     });
 
-    // Draw country markers
-    const d = state.data[state.shield];
-    const latestReign = d.R[d.R.length - 1];
-    const currentHolder = latestReign.cd;
+    svg.appendChild(arcsGroup);
+
+    // Country Markers
+    const markersGroup = createSVG('g');
+    markersGroup.id = 'mapMarkersGroup';
 
     Object.values(state.countryStats).forEach(stat => {
       const pos = COUNTRY_COORDS[stat.code];
       if (!pos) return;
 
       const g = createSVG('g');
-      g.style.cursor = 'pointer';
+      g.setAttribute('class', 'map-marker-group');
+      g.setAttribute('data-code', stat.code);
 
-      const r = Math.max(6, Math.min(18, Math.sqrt(stat.matchesHosted) * 1.8));
+      const r = Math.max(5.5, Math.min(16, Math.sqrt(stat.matchesHosted) * 1.6));
 
-      // Current holder gets a pulsing ripple ring animation
+      // Current holder gets animated radar waves
       if (stat.code === currentHolder) {
         const pulse = createSVG('circle');
         pulse.setAttribute('cx', pos.x);
@@ -349,13 +620,13 @@
         pulse.setAttribute('r', r);
         pulse.setAttribute('fill', 'none');
         pulse.setAttribute('stroke', '#10B981');
-        pulse.setAttribute('stroke-width', '2.5');
+        pulse.setAttribute('stroke-width', '2');
 
         const animR = createSVG('animate');
         animR.setAttribute('attributeName', 'r');
         animR.setAttribute('from', r);
-        animR.setAttribute('to', (r + 24).toString());
-        animR.setAttribute('dur', '1.8s');
+        animR.setAttribute('to', (r + 26).toString());
+        animR.setAttribute('dur', '2s');
         animR.setAttribute('repeatCount', 'indefinite');
         pulse.appendChild(animR);
 
@@ -363,47 +634,223 @@
         animO.setAttribute('attributeName', 'opacity');
         animO.setAttribute('from', '0.9');
         animO.setAttribute('to', '0');
-        animO.setAttribute('dur', '1.8s');
+        animO.setAttribute('dur', '2s');
         animO.setAttribute('repeatCount', 'indefinite');
         pulse.appendChild(animO);
 
-        svg.appendChild(pulse);
+        g.appendChild(pulse);
       }
 
       const colors = getColors(stat.code);
-      const circle = createSVG('circle');
-      circle.setAttribute('cx', pos.x);
-      circle.setAttribute('cy', pos.y);
-      circle.setAttribute('r', r);
-      circle.setAttribute('fill', colors[0] || 'var(--gold-primary)');
-      circle.setAttribute('stroke', '#ffffff');
-      circle.setAttribute('stroke-width', '2');
 
-      g.appendChild(circle);
+      // Outer drop shadow ring
+      const baseRing = createSVG('circle');
+      baseRing.setAttribute('cx', pos.x);
+      baseRing.setAttribute('cy', pos.y);
+      baseRing.setAttribute('r', (r + 1.2).toString());
+      baseRing.setAttribute('fill', '#0A140F');
+      g.appendChild(baseRing);
 
-      // Tooltip events
+      // Main Coin Disc
+      const disc = createSVG('circle');
+      disc.setAttribute('cx', pos.x);
+      disc.setAttribute('cy', pos.y);
+      disc.setAttribute('r', r);
+      disc.setAttribute('fill', colors[0] || 'var(--gold-primary)');
+      disc.setAttribute('stroke', stat.code === currentHolder ? '#10B981' : '#FFFFFF');
+      disc.setAttribute('stroke-width', stat.code === currentHolder ? '2' : '1.5');
+      g.appendChild(disc);
+
+      // Secondary color center core
+      if (colors[1] && r > 7) {
+        const core = createSVG('circle');
+        core.setAttribute('cx', pos.x);
+        core.setAttribute('cy', pos.y);
+        core.setAttribute('r', (r * 0.45).toFixed(1));
+        core.setAttribute('fill', colors[1]);
+        g.appendChild(core);
+      }
+
+      // Nation label beneath major nations
+      if (stat.matchesHosted >= 10 || stat.code === currentHolder) {
+        const label = createSVG('text');
+        label.setAttribute('x', pos.x);
+        label.setAttribute('y', (pos.y + r + 10).toFixed(1));
+        label.setAttribute('class', 'map-marker-label');
+        label.textContent = stat.name.toUpperCase();
+        g.appendChild(label);
+      }
+
+      // Tooltip Events
       g.addEventListener('mouseenter', (e) => {
         const tooltip = state.tooltip;
         if (!tooltip) return;
         const flag = getFlag(stat.code);
         const matchLabel = state.shield === 'raeburn' ? 'Matches hosted' : 'Reigns held';
+        const venueInfo = pos.venue ? `<div class="tt-stat"><span class="tt-stat-label">Historic Venue:</span> <span class="tt-stat-val">${pos.venue}</span></div>` : '';
+        const isHolder = stat.code === currentHolder ? '<div style="margin-top:6px; font-weight:700; color:#10B981;">&#x2714; REIGNING CUSTODIAN</div>' : '';
+
         tooltip.innerHTML = `
-          <div style="font-weight:700; margin-bottom:6px;"><span class="tt-flag">${flag}</span><span class="tt-name">${stat.name}</span></div>
+          <div style="font-weight:700; margin-bottom:6px; font-size:0.95rem;">
+            <span class="tt-flag" style="font-size:1.15rem; margin-right:6px;">${flag}</span>
+            <span class="tt-name">${stat.name}</span>
+          </div>
           <div class="tt-stat"><span class="tt-stat-label">${matchLabel}:</span> <span class="tt-stat-val">${stat.matchesHosted}</span></div>
           <div class="tt-stat"><span class="tt-stat-label">First visit:</span> <span class="tt-stat-val">${formatDate(stat.firstVisit)}</span></div>
           <div class="tt-stat"><span class="tt-stat-label">Last visit:</span> <span class="tt-stat-val">${formatDate(stat.lastVisit)}</span></div>
-          <div class="tt-stat"><span class="tt-stat-label">Times visited:</span> <span class="tt-stat-val">${stat.visitCount}</span></div>
+          <div class="tt-stat"><span class="tt-stat-label">Border crossings:</span> <span class="tt-stat-val">${stat.visitCount}</span></div>
+          ${venueInfo}
+          ${isHolder}
         `;
         tooltip.style.display = 'block';
         positionTooltip(e);
+
+        // Highlight country polygon
+        const poly = document.querySelector(`.map-country[data-country="${stat.code}"]`);
+        if (poly) poly.classList.add('highlighted');
       });
+
       g.addEventListener('mousemove', positionTooltip);
       g.addEventListener('mouseleave', () => {
         if (state.tooltip) state.tooltip.style.display = 'none';
+        const poly = document.querySelector(`.map-country[data-country="${stat.code}"]`);
+        if (poly) poly.classList.remove('highlighted');
       });
 
-      svg.appendChild(g);
+      markersGroup.appendChild(g);
     });
+
+    svg.appendChild(markersGroup);
+  }
+
+  function setupPanZoom() {
+    const container = document.getElementById('mapContainer');
+    const svg = document.getElementById('journeyMap');
+    if (!container || !svg) return;
+
+    // Region Presets
+    document.querySelectorAll('.map-btn[data-region]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.map-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const reg = btn.getAttribute('data-region');
+        if (REGION_VIEWS[reg]) {
+          animateViewBox(REGION_VIEWS[reg]);
+        }
+      });
+    });
+
+    // Zoom Buttons
+    const zoomInBtn = document.getElementById('zoomIn');
+    const zoomOutBtn = document.getElementById('zoomOut');
+    const zoomResetBtn = document.getElementById('zoomReset');
+
+    if (zoomInBtn) {
+      zoomInBtn.addEventListener('click', () => zoomBy(0.7));
+    }
+    if (zoomOutBtn) {
+      zoomOutBtn.addEventListener('click', () => zoomBy(1.4));
+    }
+    if (zoomResetBtn) {
+      zoomResetBtn.addEventListener('click', () => {
+        document.querySelectorAll('.map-btn').forEach(b => b.classList.remove('active'));
+        const worldBtn = document.querySelector('.map-btn[data-region="world"]');
+        if (worldBtn) worldBtn.classList.add('active');
+        animateViewBox(REGION_VIEWS.world);
+      });
+    }
+
+    // Drag to Pan
+    let isDown = false;
+    let startClientX = 0;
+    let startClientY = 0;
+    let startView = null;
+
+    container.addEventListener('mousedown', (e) => {
+      if (e.button !== 0 || e.target.closest('button')) return;
+      isDown = true;
+      startClientX = e.clientX;
+      startClientY = e.clientY;
+      startView = { ...viewState.current };
+      container.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDown || !startView) return;
+      const rect = svg.getBoundingClientRect();
+      const scaleX = startView.w / rect.width;
+      const scaleY = startView.h / rect.height;
+      const dx = (e.clientX - startClientX) * scaleX;
+      const dy = (e.clientY - startClientY) * scaleY;
+
+      viewState.current.x = Math.max(-150, Math.min(900, startView.x - dx));
+      viewState.current.y = Math.max(-100, Math.min(450, startView.y - dy));
+      svg.setAttribute('viewBox', `${viewState.current.x} ${viewState.current.y} ${viewState.current.w} ${viewState.current.h}`);
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDown) {
+        isDown = false;
+        container.style.cursor = 'grab';
+      }
+    });
+
+    // Wheel Zoom
+    container.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const factor = e.deltaY > 0 ? 1.15 : 0.87;
+      zoomBy(factor, e);
+    }, { passive: false });
+
+    function zoomBy(factor, mouseEvent) {
+      const cur = viewState.current;
+      const newW = Math.max(120, Math.min(1200, cur.w * factor));
+      const newH = Math.max(62, Math.min(624, cur.h * factor));
+      
+      let centerX = cur.x + cur.w / 2;
+      let centerY = cur.y + cur.h / 2;
+
+      if (mouseEvent) {
+        const rect = svg.getBoundingClientRect();
+        const relX = (mouseEvent.clientX - rect.left) / rect.width;
+        const relY = (mouseEvent.clientY - rect.top) / rect.height;
+        centerX = cur.x + relX * cur.w;
+        centerY = cur.y + relY * cur.h;
+      }
+
+      const newX = Math.max(-150, Math.min(900, centerX - newW / 2));
+      const newY = Math.max(-100, Math.min(450, centerY - newH / 2));
+
+      animateViewBox({ x: newX, y: newY, w: newW, h: newH });
+    }
+  }
+
+  function animateViewBox(target) {
+    if (viewState.animId) cancelAnimationFrame(viewState.animId);
+    const start = { ...viewState.current };
+    const startTime = performance.now();
+    const duration = 450;
+
+    function step(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      const ease = 1 - Math.pow(1 - progress, 3);
+
+      viewState.current.x = start.x + (target.x - start.x) * ease;
+      viewState.current.y = start.y + (target.y - start.y) * ease;
+      viewState.current.w = start.w + (target.w - start.w) * ease;
+      viewState.current.h = start.h + (target.h - start.h) * ease;
+
+      const svg = document.getElementById('journeyMap');
+      if (svg) {
+        svg.setAttribute('viewBox', `${viewState.current.x.toFixed(1)} ${viewState.current.y.toFixed(1)} ${viewState.current.w.toFixed(1)} ${viewState.current.h.toFixed(1)}`);
+      }
+
+      if (progress < 1) {
+        viewState.animId = requestAnimationFrame(step);
+      }
+    }
+    viewState.animId = requestAnimationFrame(step);
   }
 
   function renderCurrentPosition() {
@@ -451,6 +898,7 @@
       const [c1, c2] = routeKey.split('-');
       const card = document.createElement('div');
       card.className = 'route-card';
+      card.setAttribute('data-route', routeKey);
       card.innerHTML = `
         <span class="route-rank">#${idx + 1}</span>
         <div class="route-teams">
@@ -459,6 +907,16 @@
         </div>
         <span class="route-count">${count}&times;</span>
       `;
+
+      card.addEventListener('mouseenter', () => {
+        const arc = document.querySelector(`.map-arc[data-route="${routeKey}"]`);
+        if (arc) arc.classList.add('highlighted');
+      });
+      card.addEventListener('mouseleave', () => {
+        const arc = document.querySelector(`.map-arc[data-route="${routeKey}"]`);
+        if (arc) arc.classList.remove('highlighted');
+      });
+
       grid.appendChild(card);
     });
   }
@@ -475,6 +933,7 @@
       const colors = getColors(stat.code);
       const card = document.createElement('div');
       card.className = 'country-detail-card';
+      card.setAttribute('data-country', stat.code);
 
       card.innerHTML = `
         <div class="card-accent-bar" style="background: ${colors[0] || 'var(--gold-primary)'};"></div>
@@ -504,6 +963,20 @@
           </div>
         </div>
       `;
+
+      card.addEventListener('mouseenter', () => {
+        const poly = document.querySelector(`.map-country[data-country="${stat.code}"]`);
+        if (poly) poly.classList.add('highlighted');
+        const marker = document.querySelector(`.map-marker-group[data-code="${stat.code}"]`);
+        if (marker) marker.style.transform = 'scale(1.25)';
+      });
+      card.addEventListener('mouseleave', () => {
+        const poly = document.querySelector(`.map-country[data-country="${stat.code}"]`);
+        if (poly) poly.classList.remove('highlighted');
+        const marker = document.querySelector(`.map-marker-group[data-code="${stat.code}"]`);
+        if (marker) marker.style.transform = '';
+      });
+
       grid.appendChild(card);
     });
   }
@@ -563,7 +1036,6 @@
           container.appendChild(entry);
         });
       }
-
 
       renderEntries(entriesToShow, content);
 

@@ -878,19 +878,263 @@ body::before {
   }
 }
 
+/* ==========================================================================
+   CARTOGRAPHIC REGISTER & NATURAL EARTH WORLD MAP
+   ========================================================================== */
+
+.map-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--rule-bronze);
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.map-toolbar-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.map-toolbar-meta .toolbar-label {
+  color: var(--gold-primary);
+  font-weight: 700;
+}
+
+.map-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.map-region-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--bg-pitch-dark);
+  padding: 3px;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-xs);
+}
+
+.map-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+}
+
+.map-btn:hover {
+  color: var(--text-pure);
+  background: rgba(197, 160, 89, 0.12);
+}
+
+.map-btn.active {
+  background: var(--gold-primary);
+  color: #0A120E;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+.map-zoom-buttons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--bg-pitch-dark);
+  padding: 3px;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-xs);
+}
+
+.map-icon-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: var(--transition-fast);
+}
+
+.map-icon-btn:hover {
+  background: rgba(197, 160, 89, 0.15);
+  color: var(--gold-light);
+}
+
 .map-wrapper {
   position: relative;
-  background: #08110D;
+  background: #060E0A;
   border: 1px solid var(--rule-bronze);
-  border-radius: var(--radius-sm);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
   overflow: hidden;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  cursor: grab;
+  user-select: none;
+}
+
+.map-wrapper:active {
+  cursor: grabbing;
 }
 
 .map-wrapper svg {
   display: block;
   width: 100%;
   height: auto;
+  pointer-events: all;
+}
+
+/* SVG Landmass & Elements */
+.map-landmass {
+  fill: #13241B;
+  stroke: #1E3A2C;
+  stroke-width: 0.8;
+  transition: fill 0.25s ease;
+}
+
+.map-borders {
+  fill: none;
+  stroke: rgba(197, 160, 89, 0.18);
+  stroke-width: 0.65;
+  stroke-dasharray: 2 3;
+  pointer-events: none;
+}
+
+.map-country {
+  fill: rgba(197, 160, 89, 0.06);
+  stroke: rgba(197, 160, 89, 0.35);
+  stroke-width: 0.85;
+  cursor: pointer;
+  transition: fill 0.25s ease, stroke 0.25s ease, filter 0.25s ease;
+}
+
+.map-country:hover, .map-country.highlighted {
+  fill: rgba(197, 160, 89, 0.28) !important;
+  stroke: var(--gold-light) !important;
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 8px rgba(197, 160, 89, 0.45));
+}
+
+.map-country.current-custodian {
+  fill: rgba(16, 185, 129, 0.22);
+  stroke: #10B981;
+  stroke-width: 1.25;
+  animation: countryBreathe 3s ease-in-out infinite;
+}
+
+@keyframes countryBreathe {
+  0%, 100% { fill: rgba(16, 185, 129, 0.18); }
+  50% { fill: rgba(16, 185, 129, 0.32); }
+}
+
+/* Navigational Graticule & Typography */
+.map-graticule-line {
+  stroke: rgba(197, 160, 89, 0.06);
+  stroke-width: 0.65;
+  pointer-events: none;
+}
+
+.map-equator {
+  stroke: rgba(197, 160, 89, 0.35);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  pointer-events: none;
+}
+
+.map-tropic {
+  stroke: rgba(197, 160, 89, 0.18);
+  stroke-width: 0.75;
+  stroke-dasharray: 2 4;
+  pointer-events: none;
+}
+
+.map-graticule-text {
+  font-family: var(--font-display);
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  fill: rgba(197, 160, 89, 0.45);
+  text-anchor: middle;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Travel Arcs */
+.map-arc {
+  fill: none;
+  stroke: var(--gold-primary);
+  pointer-events: stroke;
+  cursor: pointer;
+  transition: stroke-width 0.2s, stroke-opacity 0.2s, stroke 0.2s;
+}
+
+.map-arc:hover, .map-arc.highlighted {
+  stroke: #FFFFFF !important;
+  stroke-opacity: 1 !important;
+  stroke-width: 3.5 !important;
+  filter: drop-shadow(0 0 6px rgba(226, 200, 137, 0.9));
+}
+
+.map-arc-pulse {
+  fill: none;
+  stroke: var(--gold-light);
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+/* Country Markers */
+.map-marker-group {
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.map-marker-group:hover {
+  transform: scale(1.18);
+}
+
+.map-marker-ring {
+  fill: none;
+  stroke: #FFFFFF;
+  stroke-width: 1.5;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
+}
+
+.map-marker-label {
+  font-family: var(--font-display);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  fill: var(--text-pure);
+  text-anchor: middle;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: #0A140F;
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
+  user-select: none;
 }
 
 .map-tooltip {
@@ -905,8 +1149,9 @@ body::before {
   pointer-events: none;
   z-index: 50;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
-  min-width: 180px;
-  max-width: 250px;
+  min-width: 200px;
+  max-width: 280px;
+  backdrop-filter: blur(4px);
 }
 
 .map-legend {
