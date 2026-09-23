@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Lineal Dispatch &mdash; The Raeburn &amp; Utrecht Shields</title>
+  <meta name="description" content="Your daily morning rugby lineage dispatch from the Raeburn & Utrecht Shields. Scan each morning for historic matches, milestones, and championship lore.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=JetBrains+Mono:wght@500;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,400;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="daily-page-body">
+
+  <!-- Spinning Raeburn Shield Page Loader -->
+  <div class="loader-overlay" id="page-loader">
+    <div class="shield-spinner-wrapper">
+      <img src="raeburn-shield.png" alt="The Raeburn Shield" class="shield-spinner">
+    </div>
+    <p class="loader-title">The Raeburn Shield</p>
+    <p class="loader-subtitle">Lineal Champions Since 1871</p>
+  </div>
+
+  <div class="daily-card-container">
+
+    <!-- Masthead Header -->
+    <header class="daily-header">
+      <div class="daily-mug-badge">
+        <span>&bull; Morning Custodial Dispatch &bull;</span>
+      </div>
+      <h1 class="daily-site-title">
+        <a href="index.html">The Raeburn Gazette</a>
+      </h1>
+      <p class="daily-site-sub">Daily Lineage &amp; Historic Tests Since 1871</p>
+    </header>
+
+    <!-- Date Navigation Header -->
+    <div class="daily-date-nav">
+      <button id="btnPrevDay" class="daily-nav-btn" aria-label="Previous day">&larr;</button>
+      <div class="daily-date-display">
+        <div class="daily-date-day" id="dailyDayName">Wednesday</div>
+        <div class="daily-date-full" id="dailyDateFormatted">23 September</div>
+      </div>
+      <button id="btnNextDay" class="daily-nav-btn" aria-label="Next day">&rarr;</button>
+    </div>
+
+    <!-- Main Fact Card Container -->
+    <article class="daily-fact-card" id="dailyFactCard">
+      <!-- Injected by daily.js -->
+      <div class="daily-card-loading">Compiling today's archival test record...</div>
+    </article>
+
+    <!-- Multi-match Switcher (if > 1 match today) -->
+    <div class="daily-multi-matches" id="multiMatchNav" style="display:none;">
+      <!-- Injected by daily.js -->
+    </div>
+
+    <!-- On This Day in Eras Past -->
+    <section class="daily-eras-section" id="dailyErasSection">
+      <h3 class="daily-section-heading">Custodians on This Day Across Eras</h3>
+      <div class="daily-eras-grid" id="dailyErasGrid">
+        <!-- Injected by daily.js -->
+      </div>
+    </section>
+
+    <!-- Live Current Custodian -->
+    <section class="daily-custodian-bar" id="dailyCustodianBar">
+      <div class="custodian-bar-left">
+        <span>Active Custodian</span>
+      </div>
+      <div class="custodian-bar-right" id="dailyLiveHolder">
+        <span id="custodianFlag">🇿🇦</span>
+        <strong id="custodianName">South Africa</strong>
+        <span class="custodian-days" id="custodianDays">25 days</span>
+      </div>
+    </section>
+
+    <!-- Interactive Actions -->
+    <div class="daily-actions">
+      <button id="btnShareFact" class="daily-action-btn primary-action">
+        Share Dispatch
+      </button>
+      <button id="btnRandomFact" class="daily-action-btn">
+        Random Date
+      </button>
+      <button id="btnToday" class="daily-action-btn">
+        Today
+      </button>
+    </div>
+
+    <!-- Toast Notification for Share -->
+    <div id="dailyToast" class="daily-toast" style="display:none;">
+      Dispatch copied to clipboard
+    </div>
+
+    <!-- Footer Links -->
+    <footer class="daily-footer">
+      <nav class="daily-footer-nav">
+        <a href="index.html">&sect; I. This Week in History</a>
+        <span>&bull;</span>
+        <a href="journey.html">&sect; II. Shield Journey</a>
+      </nav>
+      <p class="daily-footer-note">
+        Scan your mug each morning for a fresh archival piece of international rugby lore.
+      </p>
+    </footer>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="data/raeburn-data.js"></script>
+  <script src="data/utrecht-data.js"></script>
+  <script src="js/daily.js"></script>
+  <script>
+    window.addEventListener("load", function () {
+      const loader = document.getElementById("page-loader");
+      if (loader) {
+        setTimeout(function() {
+          loader.classList.add("loader-fade-out");
+        }, 1400);
+      }
+    });
+    setTimeout(function() {
+      const loader = document.getElementById("page-loader");
+      if (loader && !loader.classList.contains("loader-fade-out")) {
+        loader.classList.add("loader-fade-out");
+      }
+    }, 3500);
+  </script>
+</body>
+</html>
