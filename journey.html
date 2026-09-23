@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Shield's Global Journey &mdash; The Raeburn &amp; Utrecht Shields</title>
+  <meta name="description" content="Cartographic chronicle of every country the Raeburn and Utrecht Shields have visited since 1871, most frequent routes, and current physical custody.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=JetBrains+Mono:wght@500;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,400;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Spinning Raeburn Shield Page Loader -->
+  <div class="loader-overlay" id="page-loader">
+    <div class="shield-spinner-wrapper">
+      <img src="raeburn-shield.png" alt="The Raeburn Shield" class="shield-spinner">
+    </div>
+    <p class="loader-title">The Raeburn Shield</p>
+    <p class="loader-subtitle">Lineal Champions Since 1871</p>
+  </div>
+
+  <!-- Broadsheet Masthead Header -->
+  <header class="site-header">
+    <div class="container">
+      <div class="masthead-meta-bar">
+        <span>EDINBURGH &bull; 27th MARCH 1871</span>
+        <span>GEOGRAPHIC REGISTER OF EXPEDITIONS</span>
+        <span>VOL. CLVI</span>
+      </div>
+
+      <div class="header-top">
+        <a href="index.html" class="brand-badge">
+          <div class="shield-emblem">
+            <img src="raeburn-shield.png" alt="Shield Emblem">
+          </div>
+          <div class="brand-text">
+            <h1><span class="gold-shimmer">The Raeburn &amp; Utrecht Shields</span></h1>
+            <p>Geographic Expeditions &bull; 155 Years Across the Globe</p>
+          </div>
+        </a>
+
+        <div class="shield-switcher" role="tablist" aria-label="Shield Selector">
+          <button id="tabRaeburn" class="shield-tab active" role="tab" aria-selected="true">
+            <span>Raeburn Shield</span>
+            <span class="tab-badge">Men's &bull; Since 1871</span>
+          </button>
+          <button id="tabUtrecht" class="shield-tab" role="tab" aria-selected="false">
+            <span>Utrecht Shield</span>
+            <span class="tab-badge">Women's &bull; Since 1982</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Page Navigation -->
+      <nav class="page-nav" aria-label="Site sections">
+        <a href="index.html" class="page-nav-link">
+          <span>&sect; I.</span> This Week in History
+        </a>
+        <a href="journey.html" class="page-nav-link active" aria-current="page">
+          <span>&sect; II.</span> Shield Journey
+        </a>
+        <a href="daily.html" class="page-nav-link">
+          <span>&sect; III.</span> Daily Dispatch
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Current Position Hero -->
+    <section class="journey-position-hero" id="positionHero">
+      <div class="position-hero-grid">
+        <div class="position-hero-content">
+          <div class="hero-meta-tag">
+            <span>&bull; Physical Location &bull;</span>
+          </div>
+          <div class="hero-nation-title">
+            <h2 class="hero-nation-name" id="posCountry">South Africa</h2>
+            <span class="hero-reign-badge" id="posFlag">🇿🇦 Current Custodian</span>
+          </div>
+          <p class="hero-reign-desc" id="posDesc">
+            The prize currently resides within <strong>South Africa</strong>, holders since <strong>29 Aug 2026</strong>.
+          </p>
+          <div class="hero-stats-row" id="journeyStatsRow">
+            <div class="stat-pill">
+              <div class="stat-label">Nations Visited</div>
+              <div class="stat-val" id="statCountries">15</div>
+            </div>
+            <div class="stat-pill">
+              <div class="stat-label">Border Crossings</div>
+              <div class="stat-val" id="statCrossings">412</div>
+            </div>
+            <div class="stat-pill">
+              <div class="stat-label">Matches Under Shield</div>
+              <div class="stat-val" id="statMatches">717</div>
+            </div>
+            <div class="stat-pill">
+              <div class="stat-label">Years of Travel</div>
+              <div class="stat-val" id="statYears">155</div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-crest-wrap">
+          <div class="crest-shield">
+            <img src="raeburn-shield.png" alt="Championship Shield">
+          </div>
+          <div class="crest-swatch-split">
+            <span id="posCrestLeft" style="background: #007749;"></span>
+            <span id="posCrestRight" style="background: #FFB81C;"></span>
+          </div>
+          <span class="reign-num" id="posShieldLabel">Raeburn Shield</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Antiquarian Cartographic Map -->
+    <section class="journey-map-section" style="margin-bottom: 2.5rem;">
+      <div class="section-title-wrap">
+        <div>
+          <h3 class="section-title">Global Cartography of Title Defences</h3>
+          <p class="section-subtitle">Every sovereign nation where the Shield has been physically contested since 1871. Marker caliber reflects matches hosted.</p>
+        </div>
+      </div>
+
+      <div class="map-wrapper">
+        <svg id="journeyMap" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
+          <!-- Generated dynamically by journey.js -->
+        </svg>
+        <div id="mapTooltip" class="map-tooltip" style="display:none;"></div>
+      </div>
+
+      <div class="map-legend">
+        <div class="legend-item">
+          <span class="legend-dot legend-dot-current"></span>
+          <span>Current Physical Custodian</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot legend-dot-visited"></span>
+          <span>Host Country (Size = Match Volume)</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-line"></span>
+          <span>Maritime &amp; Overland Travel Arc</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Top Routes -->
+    <section style="margin-bottom: 2.5rem;" id="topRoutesSection">
+      <div class="section-title-wrap">
+        <div>
+          <h3 class="section-title">Most Frequented Corridors</h3>
+          <p class="section-subtitle">The highest-frequency international border crossings in world rugby lineage</p>
+        </div>
+      </div>
+      <div class="routes-grid" id="topRoutesGrid">
+        <!-- Injected by journey.js -->
+      </div>
+    </section>
+
+    <!-- Countries Visited Grid -->
+    <section style="margin-bottom: 2.5rem;">
+      <div class="section-title-wrap">
+        <div>
+          <h3 class="section-title">Roll of Host Nations</h3>
+          <p class="section-subtitle">Comprehensive gazette of every country that has hosted a Shield match, ordered by frequency</p>
+        </div>
+      </div>
+      <div class="countries-detail-grid" id="countriesGrid">
+        <!-- Injected by journey.js -->
+      </div>
+    </section>
+
+    <!-- Travel Log Timeline -->
+    <section style="margin-bottom: 2.5rem;">
+      <div class="section-title-wrap">
+        <div>
+          <h3 class="section-title">Chronological Border Register</h3>
+          <p class="section-subtitle">Historical register of every border crossing in chronological order, catalogued by decade</p>
+        </div>
+        <span class="hero-meta-tag" id="crossingCountBadge" style="margin-bottom:0;">0 Crossings</span>
+      </div>
+      <div class="travel-log-timeline" id="travelLog">
+        <!-- Injected by journey.js -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <p class="footer-quote">
+        &ldquo;Because international rugby is at its most enjoyable when any nation could win the prize.&rdquo;
+      </p>
+      <p style="margin-bottom: 0.5rem; font-family: var(--font-display); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold-light);">
+        &mdash; Dave &bull; Raeburn &amp; Utrecht Shield Chief Guardian
+      </p>
+      <p style="font-size: 0.82rem; color: var(--text-dim);">
+        Based on official lineage archives from <a href="https://www.raeburnandutrechtshields.com/previousholders" target="_blank" rel="noopener noreferrer" style="color: var(--gold-primary);">raeburnandutrechtshields.com</a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="data/raeburn-data.js"></script>
+  <script src="data/utrecht-data.js"></script>
+  <script src="js/journey.js"></script>
+  <script>
+    window.addEventListener("load", function () {
+      const loader = document.getElementById("page-loader");
+      if (loader) {
+        setTimeout(function() {
+          loader.classList.add("loader-fade-out");
+        }, 1400);
+      }
+    });
+    setTimeout(function() {
+      const loader = document.getElementById("page-loader");
+      if (loader && !loader.classList.contains("loader-fade-out")) {
+        loader.classList.add("loader-fade-out");
+      }
+    }, 3500);
+  </script>
+</body>
+</html>

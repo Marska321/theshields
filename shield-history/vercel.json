@@ -1,0 +1,12 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/shield", "destination": "/index.html" },
+    { "source": "/journey", "destination": "/journey.html" },
+    { "source": "/daily", "destination": "/daily.html" },
+    { "source": "/mug", "destination": "/daily.html" },
+    { "source": "/fact", "destination": "/daily.html" },
+    { "source": "/shield-history/(.*)", "destination": "/$1" }
+  ]
+}

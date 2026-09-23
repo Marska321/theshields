@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Raeburn &amp; Utrecht Shields &mdash; The Official Lineal Gazette</title>
+  <meta name="description" content="The unbroken lineal championship of world international rugby since 1871. Explore this week in history, historical title defences, and champion reigns.">
+
+  <!-- Editorial & Classical Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=JetBrains+Mono:wght@500;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,400;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Spinning Raeburn Shield Page Loader -->
+  <div class="loader-overlay" id="page-loader">
+    <div class="shield-spinner-wrapper">
+      <img src="raeburn-shield.png" alt="The Raeburn Shield" class="shield-spinner">
+    </div>
+    <p class="loader-title">The Raeburn Shield</p>
+    <p class="loader-subtitle">Lineal World Champions Since 1871</p>
+  </div>
+
+  <!-- Broadsheet Masthead Header -->
+  <header class="site-header">
+    <div class="container">
+      <div class="masthead-meta-bar">
+        <span>EDINBURGH &bull; 27th MARCH 1871</span>
+        <span>THE LINEAL GAZETTE OF WORLD RUGBY</span>
+        <span>VOL. CLVI</span>
+      </div>
+
+      <div class="header-top">
+        <a href="index.html" class="brand-badge">
+          <div class="shield-emblem">
+            <img src="raeburn-shield.png" alt="The Raeburn Shield Circular Emblem">
+          </div>
+          <div class="brand-text">
+            <h1><span class="gold-shimmer">The Raeburn &amp; Utrecht Shields</span></h1>
+            <p>The Unbroken Lineal Championship of World Rugby &bull; 1871 to Present</p>
+          </div>
+        </a>
+
+        <!-- Dual Shield Switcher -->
+        <div class="shield-switcher" role="tablist" aria-label="Shield Selector">
+          <button id="tabRaeburn" class="shield-tab active" role="tab" aria-selected="true">
+            <span>Raeburn Shield</span>
+            <span class="tab-badge">Men's &bull; Since 1871</span>
+          </button>
+          <button id="tabUtrecht" class="shield-tab" role="tab" aria-selected="false">
+            <span>Utrecht Shield</span>
+            <span class="tab-badge">Women's &bull; Since 1982</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Page Navigation -->
+      <nav class="page-nav" aria-label="Site sections">
+        <a href="index.html" class="page-nav-link active" aria-current="page">
+          <span>&sect; I.</span> This Week in History
+        </a>
+        <a href="journey.html" class="page-nav-link">
+          <span>&sect; II.</span> Shield Journey
+        </a>
+        <a href="daily.html" class="page-nav-link">
+          <span>&sect; III.</span> Daily Dispatch
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Current Shield Holder Hero Card -->
+    <section class="current-holder-hero" aria-labelledby="currentHolderHeading">
+      <div class="hero-grid">
+        <div class="hero-content">
+          <div class="hero-meta-tag">
+            <span id="currentHolderHeading">&bull; Official Custodian &bull;</span>
+          </div>
+
+          <div class="hero-nation-title">
+            <h2 class="hero-nation-name" id="heroNation">South Africa</h2>
+            <span class="hero-reign-badge" id="heroReignBadge">Reign CCXXII</span>
+          </div>
+
+          <p class="hero-reign-desc" id="heroDesc">
+            Current lineal custodians of the Raeburn Shield, won from <strong>New Zealand</strong> on <strong>29 August 2026</strong>.
+          </p>
+
+          <div class="hero-stats-row">
+            <div class="stat-pill">
+              <div class="stat-label">Reign Number</div>
+              <div class="stat-val" id="heroReignNo">#222</div>
+            </div>
+
+            <div class="stat-pill">
+              <div class="stat-label">Days Held</div>
+              <div class="stat-val" id="heroDaysHeld">25<small>days</small></div>
+            </div>
+
+            <div class="stat-pill">
+              <div class="stat-label">Defences Won</div>
+              <div class="stat-val" id="heroDefences">1</div>
+            </div>
+
+            <div class="stat-pill">
+              <div class="stat-label">Captured From</div>
+              <div class="stat-val" style="font-size: 1.15rem; font-family: var(--font-display);" id="heroLastOpponent">New Zealand</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-crest-wrap">
+          <div class="crest-shield">
+            <img src="raeburn-shield.png" alt="Championship Shield">
+          </div>
+          <div class="crest-swatch-split">
+            <span id="crestLeft" style="background: #007749;"></span>
+            <span id="crestRight" style="background: #FFB81C;"></span>
+          </div>
+          <span class="reign-num" id="heroCrestReign">Active Champion</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Time Engine: This Week in History Controls -->
+    <section class="week-navigator-card">
+      <div class="week-nav-header">
+        <div>
+          <div class="week-date-headline" id="weekDisplayNumber">Week 39</div>
+          <div class="week-date-sub" id="weekDisplayDates">Sep 20 &ndash; Sep 26</div>
+        </div>
+
+        <div class="week-nav-buttons">
+          <button id="btnPrevWeek" class="btn-icon-nav" title="Previous calendar week">
+            &larr; Prev Week
+          </button>
+          <button id="btnToday" class="btn-icon-nav btn-today-jump" title="Jump to current week">
+            Current Week
+          </button>
+          <button id="btnNextWeek" class="btn-icon-nav" title="Next calendar week">
+            Next Week &rarr;
+          </button>
+          <button id="btnRandomWeek" class="btn-icon-nav" title="Jump to an iconic historical week">
+            Iconic Week
+          </button>
+        </div>
+      </div>
+
+      <!-- 52-Week Scrubber Slider -->
+      <div class="week-slider-wrap">
+        <input type="range" id="weekSlider" class="week-slider" min="1" max="52" value="39" aria-label="Select week of the year">
+      </div>
+
+      <!-- Filters Row -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-top: 1px solid var(--rule-subtle); padding-top: 1rem;">
+        <div class="shield-switcher" role="group" aria-label="Filter by Decade">
+          <button class="decade-btn shield-tab active" data-decade="all" style="padding: 0.4rem 0.75rem; font-size: 0.72rem;">All Decades</button>
+          <button class="decade-btn shield-tab" data-decade="2020" style="padding: 0.4rem 0.75rem; font-size: 0.72rem;">2020s</button>
+          <button class="decade-btn shield-tab" data-decade="2010" style="padding: 0.4rem 0.75rem; font-size: 0.72rem;">2010s</button>
+          <button class="decade-btn shield-tab" data-decade="2000" style="padding: 0.4rem 0.75rem; font-size: 0.72rem;">2000s</button>
+          <button class="decade-btn shield-tab" data-decade="1990" style="padding: 0.4rem 0.75rem; font-size: 0.72rem;">1990s</button>
+          <button class="decade-btn shield-tab" data-decade="1980" style="padding: 0.4rem 0.75rem; font-size: 0.72rem;">1980s</button>
+          <button class="decade-btn shield-tab" data-decade="1970" style="padding: 0.4rem 0.75rem; font-size: 0.72rem;">1970s</button>
+          <button class="decade-btn shield-tab" data-decade="earlier" style="padding: 0.4rem 0.75rem; font-size: 0.72rem;">1871–1969</button>
+        </div>
+
+        <div style="min-width: 180px;">
+          <select id="nationFilter" aria-label="Filter by Nation" style="width: 100%; background: var(--bg-surface); border: 1px solid var(--rule-bronze); color: var(--gold-light); padding: 0.5rem 0.75rem; border-radius: var(--radius-xs); font-family: var(--font-display); font-size: 0.78rem; text-transform: uppercase;">
+            <option value="">All Contesting Nations</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dominance Analytics -->
+    <section class="dominance-card">
+      <div class="section-title-wrap">
+        <div>
+          <h3 class="section-title">Historical Era Dominance</h3>
+          <p class="section-subtitle">Distribution of Shield tenure during this exact 7-day calendar window across all seasons</p>
+        </div>
+      </div>
+
+      <div class="dominance-grid" id="dominanceGrid">
+        <!-- Injected dynamically via app.js -->
+      </div>
+    </section>
+
+    <!-- Historical Matches Played This Week -->
+    <section>
+      <div class="section-title-wrap">
+        <div>
+          <h3 class="section-title">Matches Contested in This Week</h3>
+          <p class="section-subtitle">Official Test matches fought under the Shield strictly within this 7-day period</p>
+        </div>
+        <span class="hero-meta-tag" id="matchCountBadge" style="margin-bottom: 0;">0 Matches Recorded</span>
+      </div>
+
+      <div class="matches-grid" id="matchesList">
+        <!-- Injected dynamically via app.js -->
+      </div>
+    </section>
+
+    <!-- Full Year-by-Year Lineal Chronicle -->
+    <section>
+      <div class="section-title-wrap">
+        <div>
+          <h3 class="section-title">The Lineal Roll of Champions</h3>
+          <p class="section-subtitle">Chronological register of the nation holding the prize in this week for each season since 1871</p>
+        </div>
+        <div style="font-family: var(--font-display); font-size: 0.75rem; color: var(--gold-light); letter-spacing: 0.1em; text-transform: uppercase;">
+          Select any year for reign dispatch
+        </div>
+      </div>
+
+      <div class="history-grid-container" id="historyGrid">
+        <!-- Injected dynamically via app.js -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Reign Detail Modal -->
+  <div id="reignModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-content">
+      <button id="modalClose" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      <div id="modalBody">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <p class="footer-quote">
+        &ldquo;Because international rugby is at its most enjoyable when any nation could win the prize.&rdquo;
+      </p>
+      <p style="margin-bottom: 0.5rem; font-family: var(--font-display); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold-light);">
+        &mdash; Dave &bull; Raeburn &amp; Utrecht Shield Chief Guardian
+      </p>
+      <p style="font-size: 0.82rem; color: var(--text-dim);">
+        Based on official lineage archives from <a href="https://www.raeburnandutrechtshields.com/previousholders" target="_blank" rel="noopener noreferrer" style="color: var(--gold-primary);">raeburnandutrechtshields.com</a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="data/raeburn-data.js"></script>
+  <script src="data/utrecht-data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    window.addEventListener("load", function () {
+      const loader = document.getElementById("page-loader");
+      if (loader) {
+        setTimeout(function() {
+          loader.classList.add("loader-fade-out");
+        }, 1400);
+      }
+    });
+    setTimeout(function() {
+      const loader = document.getElementById("page-loader");
+      if (loader && !loader.classList.contains("loader-fade-out")) {
+        loader.classList.add("loader-fade-out");
+      }
+    }, 3500);
+  </script>
+</body>
+</html>
